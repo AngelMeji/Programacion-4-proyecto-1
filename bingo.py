@@ -2,7 +2,7 @@ import random
 
 
 class Bingo:
-    """Generador de tarjetas de Bingo genéricas."""
+    """Generador de tarjetas de Bingo"""
 
     def __init__(self, palabra="BINGO", max_num=75):
         self.palabra = palabra.upper()
@@ -12,7 +12,7 @@ class Bingo:
         self.intervalo_columna = self.max_num // self.tam
 
     def _validar_parametros(self):
-        """Valida la palabra y el máximo número básicos del juego."""
+        """Valida la palabra y el máximo número del juego."""
         if self.tam != 5:
             raise ValueError("La palabra debe tener exactamente 5 letras.")
         if len(set(self.palabra)) != self.tam:
@@ -48,7 +48,7 @@ class Bingo:
         return tarjeta
 
     def generar_varias_tarjetas(self, cantidad):
-        """Genera 'cantidad' de tarjetas."""
+        """Genera varias tarjetas."""
         return [self.generar_tarjeta() for _ in range(cantidad)]
 
     def imprimir_tarjeta(self, tarjeta):
