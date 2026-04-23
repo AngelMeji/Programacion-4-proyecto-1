@@ -12,7 +12,6 @@ Relación:
 
 import random
 
-
 class Carton:
     """Generador de tarjetas de Bingo"""
 
@@ -22,6 +21,9 @@ class Carton:
         self.max_num = max_num
         self._validar_parametros()
         self.intervalo_columna = self.max_num // self.tam
+
+        # El cartón guarda su propia tarjeta
+        self.tarjeta = self.generar_tarjeta()
 
     def _validar_parametros(self):
         """Valida la palabra y el máximo número del juego."""
@@ -67,4 +69,21 @@ class Carton:
         print("   ".join(self.palabra))
         print("-" * (self.tam * 3))
         for fila in tarjeta:
-            print("  ".join("{:2d}".format(n) for n in fila))
+            print("  ".join("{:2}".format(n) if n != "X" else " X" for n in fila))
+
+    def marcar_numero(self, numero: int) -> bool:
+        """
+        Marca un número en la tarjeta si existe.
+
+        Retorna:
+        - True si se marcó
+        - False si no estaba en el cartón
+        """
+        for i in range(self.tam):
+            for j in range(self.tam):
+                if self.tarjeta[i][j] == numero:
+                    self.tarjeta[i][j] = "X"
+                    return True
+        return False
+    
+    
