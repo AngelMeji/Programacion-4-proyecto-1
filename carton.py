@@ -86,4 +86,25 @@ class Carton:
                     return True
         return False
     
-    
+    def verificar_bingo(self) -> bool:
+        """Verifica si el cartón tiene bingo (fila, columna o diagonal)."""
+
+        # Filas
+        for fila in self.tarjeta:
+            if all(valor == "X" for valor in fila):
+                return True
+
+        # Columnas
+        for col in range(self.tam):
+            if all(self.tarjeta[fila][col] == "X" for fila in range(self.tam)):
+                return True
+
+        # Diagonal principal
+        if all(self.tarjeta[i][i] == "X" for i in range(self.tam)):
+            return True
+
+        # Diagonal secundaria
+        if all(self.tarjeta[i][self.tam - 1 - i] == "X" for i in range(self.tam)):
+            return True
+
+        return False
