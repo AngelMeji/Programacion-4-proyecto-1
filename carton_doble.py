@@ -1,14 +1,18 @@
-"""
-Extensión de la clase Carton.
+from carton import Carton
 
-Representa un cartón doble con dos grillas independientes.
-Un jugador gana si completa cualquiera de las dos.
 
-Responsabilidades:
-- Gestionar dos cartones.
-- Verificar bingo en ambas grillas.
-- Indicar cuál está más cerca de completarse.
+class CartonDoble(Carton):
+    """
+    Representa un cartón doble de bingo.
 
-Relación:
-- Hereda de Carton (herencia).
-"""
+    Contiene dos tarjetas independientes generadas con los mismos parámetros.
+    Un jugador gana si completa cualquiera de las dos.
+
+    Relación:
+    - Hereda de Carton (herencia).
+    """
+
+    def __init__(self, palabra="BINGO", max_num=75):
+        super().__init__(palabra, max_num)
+        self.tarjeta1 = self.tarjeta  # reutiliza la del padre
+        self.tarjeta2 = self.generar_tarjeta()
