@@ -18,3 +18,12 @@ class Bombo:
         self.numeros = list(range(1, max_num + 1))
         random.shuffle(self.numeros)
         self.historial: list[int] = []
+
+    def extraer_numero(self) -> int:
+        """Extrae un número aleatorio sin repetir."""
+        if not self.numeros:
+            raise ValueError("No quedan números en el bombo.")
+
+        numero = self.numeros.pop()
+        self.historial.append(numero)
+        return numero
