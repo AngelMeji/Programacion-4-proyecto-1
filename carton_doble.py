@@ -62,3 +62,47 @@ class CartonDoble(Carton):
             return False
 
         return tiene_bingo(self.tarjeta1) or tiene_bingo(self.tarjeta2)
+    
+    def grilla_mas_cerca(self):
+        """
+        Indica cuál de las dos tarjetas está más cerca de completar el bingo,
+        basado en la línea (fila/columna/diagonal) más completa.
+        """
+
+        def mejor_linea(tablero):
+            mejor = 0
+
+            # Filas
+            for fila in tablero:
+                mejor = max(mejor, sum(1 for v in fila if v == "X"))
+
+            # Columnas
+            for col in range(self.tam):
+                mejor = max(
+                    mejor,
+                    sum(1 for fila in range(self.tam) if tablero[fila][col] == "X")
+                )
+
+            # Diagonal principal
+            mejor = max(
+                mejor,
+                sum(1 for i in range(self.tam) if tablero[i][i] == "X")
+            )
+
+            # Diagonal secundaria
+            mejor = max(
+                mejor,
+                sum(1 for i in range(self.tam) if tablero[i][self.tam - 1 - i] == "X")
+            )
+
+            return mejor
+
+        m1 = mejor_linea(self.tarjeta1)
+        m2 = mejor_linea(self.tarjeta2)
+
+        if m1 > m2:
+            return "Cartón 1"
+        elif m2 > m1:
+            return "Cartón 2"
+        else:
+            return "Ambos están igual de cerca"
