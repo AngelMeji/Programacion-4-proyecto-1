@@ -106,3 +106,17 @@ class CartonDoble(Carton):
             return "Cartón 2"
         else:
             return "Ambos están igual de cerca"
+        
+    def imprimir_cartones(self):
+        """Imprime ambas tarjetas."""
+        print("=== Cartón 1 ===")
+        self._imprimir(self.tarjeta1)
+        print("\n=== Cartón 2 ===")
+        self._imprimir(self.tarjeta2)
+
+    def _imprimir(self, tarjeta):
+        """Método auxiliar para imprimir una tarjeta."""
+        print("   ".join(self.palabra))
+        print("-" * (self.tam * 3))
+        for fila in tarjeta:
+            print("  ".join("{:2}".format(n) if n != "X" else " X" for n in fila))
