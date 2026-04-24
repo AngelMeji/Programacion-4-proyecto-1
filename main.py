@@ -1,5 +1,5 @@
 """
-Script principal para ejecutar el juego.
+Script principal para ejecutar el juego de bingo.
 
 Responsabilidades:
 - Crear el juego.
@@ -11,10 +11,12 @@ Responsabilidades:
 Este archivo se usa para la demostración del sistema.
 """
 
+from juego import Juego
+from jugador import Jugador
 from carton import Carton
+from carton_doble import CartonDoble
 
-
-def pedir_palabra():
+def pedir_palabra() -> str:
     """Pide una palabra de 5 letras sin repetir."""
     while True:
         p = input("Ingrese la palabra del juego (ej. BINGO o PLENO): ").strip().upper()
@@ -24,54 +26,3 @@ def pedir_palabra():
             print("Las letras no deben repetirse.\n")
         else:
             return p
-
-
-def pedir_entero(mensaje, minimo, maximo, multiplo=None):
-    """Pide un entero entre [minimo, maximo], opcionalmente múltiplo de 'multiplo'."""
-    while True:
-        texto = input(mensaje).strip()
-        try:
-            n = int(texto)
-        except ValueError:
-            print("Debe ingresar un número entero.\n")
-            continue
-
-        if not (minimo <= n <= maximo):
-            print("El número debe estar entre {} y {}.\n".format(minimo, maximo))
-            continue
-
-        if multiplo is not None and n % multiplo != 0:
-            print("El número debe ser múltiplo de {}.\n".format(multiplo))
-            continue
-
-        return n
-
-
-def main():
-    print("=== Generador de tarjetas de Bingo ===\n")
-
-    palabra = pedir_palabra()
-    max_num = pedir_entero(
-        "Ingrese el número máximo (entre 50 y 90, múltiplo de 5): ",
-        minimo=50,
-        maximo=90,
-        multiplo=5,
-    )
-    cantidad = pedir_entero(
-        "¿Cuántas tarjetas desea generar?: ",
-        minimo=1,
-        maximo=1000,
-    )
-
-    juego = Carton(palabra=palabra, max_num=max_num)
-    tarjetas = juego.generar_varias_tarjetas(cantidad)
-
-    print("\nTarjetas generadas:\n")
-    for i, tarjeta in enumerate(tarjetas, start=1):
-        print("Tarjeta #{}".format(i))
-        juego.imprimir_tarjeta(tarjeta)
-        print()
-
-
-if __name__ == "__main__":
-    main()
