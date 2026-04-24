@@ -64,7 +64,7 @@ class Carton:
         """Genera varias tarjetas."""
         return [self.generar_tarjeta() for _ in range(cantidad)]
 
-    def imprimir_tarjeta(self):
+    def imprimir(self) -> None:
         """Imprime la tarjeta del cartón."""
         print("   ".join(self.palabra))
         print("-" * (self.tam * 3))

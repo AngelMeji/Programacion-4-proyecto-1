@@ -97,8 +97,8 @@ class CartonDoble(Carton):
         else:
             return "Ambos están igual de cerca"
         
-    def imprimir_cartones(self):
-        """Imprime ambas tarjetas."""
+    def imprimir(self) -> None:
+        """Imprime ambas tarjetas del cartón doble."""
         print("=== Cartón 1 ===")
         self._imprimir(self.tarjeta1)
         print("\n=== Cartón 2 ===")
