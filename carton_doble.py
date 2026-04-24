@@ -40,12 +40,18 @@ class CartonDoble(Carton):
         Verifica si alguna de las dos tarjetas tiene bingo.
         """
 
+        original = self.tarjeta  # guardamos la referencia original para restaurarla después
+        
         self.tarjeta = self.tarjeta1
         if super().verificar_bingo():
+            self.tarjeta = original
             return True
 
         self.tarjeta = self.tarjeta2
-        return super().verificar_bingo()
+        resultado = super().verificar_bingo()
+
+        self.tarjeta = original
+        return resultado
     
     def grilla_mas_cerca(self):
         """
