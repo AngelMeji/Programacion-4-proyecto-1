@@ -34,3 +34,31 @@ class CartonDoble(Carton):
                         marcado_total = True
 
         return marcado_total
+    
+    def verificar_bingo(self) -> bool:
+        """
+        Verifica si alguna de las dos tarjetas tiene bingo.
+        """
+
+        def tiene_bingo(tablero):
+            # Filas
+            for fila in tablero:
+                if all(valor == "X" for valor in fila):
+                    return True
+
+            # Columnas
+            for col in range(self.tam):
+                if all(tablero[fila][col] == "X" for fila in range(self.tam)):
+                    return True
+
+            # Diagonal principal
+            if all(tablero[i][i] == "X" for i in range(self.tam)):
+                return True
+
+            # Diagonal secundaria
+            if all(tablero[i][self.tam - 1 - i] == "X" for i in range(self.tam)):
+                return True
+
+            return False
+
+        return tiene_bingo(self.tarjeta1) or tiene_bingo(self.tarjeta2)
