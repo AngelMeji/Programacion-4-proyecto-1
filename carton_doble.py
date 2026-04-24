@@ -16,3 +16,21 @@ class CartonDoble(Carton):
         super().__init__(palabra, max_num)
         self.tarjeta1 = self.tarjeta  # reutiliza la del padre
         self.tarjeta2 = self.generar_tarjeta()
+
+    def marcar_numero(self, numero: int) -> bool:
+        """
+        Marca un número en ambas tarjetas.
+
+        Retorna True si se marcó en al menos una.
+        """
+        
+        marcado_total = False
+
+        for tarjeta in (self.tarjeta1, self.tarjeta2):  # tupla de tarjetas
+            for i in range(self.tam):
+                for j in range(self.tam):
+                    if tarjeta[i][j] == numero:
+                        tarjeta[i][j] = "X"
+                        marcado_total = True
+
+        return marcado_total
