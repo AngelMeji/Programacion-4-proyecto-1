@@ -64,11 +64,11 @@ class Carton:
         """Genera varias tarjetas."""
         return [self.generar_tarjeta() for _ in range(cantidad)]
 
-    def imprimir_tarjeta(self, tarjeta):
-        """Imprime una tarjeta con la cabecera de la palabra."""
+    def imprimir_tarjeta(self):
+        """Imprime la tarjeta del cartón."""
         print("   ".join(self.palabra))
         print("-" * (self.tam * 3))
-        for fila in tarjeta:
+        for fila in self.tarjeta:
             print("  ".join("{:2}".format(n) if n != "X" else " X" for n in fila))
 
     def marcar_numero(self, numero: int) -> bool:
