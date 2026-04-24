@@ -11,8 +11,13 @@ Relación:
 - Usa jugadores (asociación).
 - Contiene el bombo (composición).
 """
+
+from bombo import Bombo
+from jugador import Jugador
+
+
 class Juego:
-    def _init_(self, max_num: int):
+    def __init__(self, max_num: int):
         self.jugadores: list[Jugador] = []
         self.bombo = Bombo(max_num)
         self.ganador: Jugador | None = None
@@ -29,6 +34,7 @@ class Juego:
     def jugar(self) -> None:
         """
         Ejecuta la partida completa hasta que haya un ganador.
+        Muestra el estado del juego en cada turno.
         """
         print("=== INICIO DEL JUEGO ===")
 
@@ -36,11 +42,20 @@ class Juego:
 
         while self.bombo.hay_numeros() and self.ganador is None:
             numero = self.bombo.extraer_numero()
-            print(f"\nTurno {turno} -> Número: {numero}")
+            print(f"\n--- Turno {turno} ---")
+            print(f"Número extraído: {numero}\n")
 
             for jugador in self.jugadores:
+                antes = jugador.numeros_marcados
                 jugador.marcar_numero(numero)
+                despues = jugador.numeros_marcados
 
+                if despues > antes:
+                    print(f"{jugador.nombre} marcó el número")
+                else:
+                    print(f"{jugador.nombre} no tiene el número")
+
+                # Verificar si ganó
                 if jugador.verificar_bingo():
                     self.ganador = jugador
                     break
@@ -54,9 +69,13 @@ class Juego:
         print("\n=== FIN DEL JUEGO ===")
 
         if self.ganador:
-            print(f"🎉 GANADOR: {self.ganador.nombre}")
+            print(f"\n🎉 GANADOR: {self.ganador.nombre}")
         else:
-            print("No hubo ganador.")
+            print("\nNo hubo ganador.")
 
-        print("\nHistorial de números:")
+        print("\nHistorial de números extraídos:")
         print(self.bombo.obtener_historial())
+
+        print("\nResumen de jugadores:")
+        for jugador in self.jugadores:
+            print(f"{jugador.nombre} marcó {jugador.numeros_marcados} números")
