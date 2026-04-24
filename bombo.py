@@ -27,3 +27,11 @@ class Bombo:
         numero = self.numeros.pop()
         self.historial.append(numero)
         return numero
+    
+    def obtener_historial(self) -> list[int]:
+        """Devuelve una copia de los números ya extraídos."""
+        return self.historial.copy()
+
+    def hay_numeros(self) -> bool:
+        """Indica si aún quedan números por extraer."""
+        return bool(self.numeros)
