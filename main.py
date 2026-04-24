@@ -26,3 +26,23 @@ def pedir_palabra() -> str:
             print("Las letras no deben repetirse.\n")
         else:
             return p
+        
+def pedir_entero(mensaje: str, minimo: int, maximo: int, multiplo: int = None) -> int:
+    """Pide un entero entre [minimo, maximo], opcionalmente múltiplo."""
+    while True:
+        texto = input(mensaje).strip()
+        try:
+            n = int(texto)
+        except ValueError:
+            print("Debe ingresar un número entero.\n")
+            continue
+
+        if not (minimo <= n <= maximo):
+            print(f"El número debe estar entre {minimo} y {maximo}.\n")
+            continue
+
+        if multiplo is not None and n % multiplo != 0:
+            print(f"El número debe ser múltiplo de {multiplo}.\n")
+            continue
+
+        return n
