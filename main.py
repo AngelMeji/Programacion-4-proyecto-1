@@ -67,11 +67,9 @@ def main():
     j3 = Jugador("Carlos")
 
     # Asignar cartones
-    j1.agregar_carton(Carton(palabra, max_num))
     j1.agregar_carton(CartonDoble(palabra, max_num))  # requisito: al menos uno doble
 
-    j2.agregar_carton(Carton(palabra, max_num))
-    j2.agregar_carton(Carton(palabra, max_num))
+    j2.agregar_carton(CartonDoble(palabra, max_num))
 
     j3.agregar_carton(Carton(palabra, max_num))
 
@@ -85,7 +83,6 @@ def main():
     for jugador in juego.jugadores:
         print(f"Jugador: {jugador.nombre}")
         for i, carton in enumerate(jugador.cartones, start=1):
-            print(f"\nCartón {i}:")
             carton.imprimir()  # POLIMORFISMO
         print("\n" + "=" * 40)
 
