@@ -58,6 +58,10 @@ class Carton:
                 tarjeta[fila][col] = valor
                 usados.add(valor)
 
+        # Celda central siempre libre (posición 2,2 en 5x5)
+        centro = self.tam // 2
+        tarjeta[centro][centro] = "X"
+
         return tarjeta
 
     def generar_varias_tarjetas(self, cantidad):
