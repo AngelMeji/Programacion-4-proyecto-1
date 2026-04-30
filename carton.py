@@ -91,14 +91,16 @@ class Carton:
         return False
     
     def verificar_bingo(self) -> bool:
-        """Verifica si el cartón tiene bingo (fila, columna o diagonal)."""
-
-        # Filas
+        """Verifica si el cartón tiene bingo en alguna de las formas válidas."""
+        
+        # === Formas básicas ===
+        
+        # Filas completas
         for fila in self.tarjeta:
             if all(valor == "X" for valor in fila):
                 return True
 
-        # Columnas
+        # Columnas completas
         for col in range(self.tam):
             if all(self.tarjeta[fila][col] == "X" for fila in range(self.tam)):
                 return True
@@ -109,6 +111,38 @@ class Carton:
 
         # Diagonal secundaria
         if all(self.tarjeta[i][self.tam - 1 - i] == "X" for i in range(self.tam)):
+            return True
+
+        # === Formas especiales ===
+        
+        # X (solo las 4 esquinas)
+        if (self.tarjeta[0][0] == "X" and 
+            self.tarjeta[0][self.tam-1] == "X" and
+            self.tarjeta[self.tam-1][0] == "X" and 
+            self.tarjeta[self.tam-1][self.tam-1] == "X"):
+            return True
+
+        # L (columna izquierda + fila inferior)
+        # Verificar columna izquierda completa
+        if all(self.tarjeta[i][0] == "X" for i in range(self.tam)):
+            return True
+        # Verificar fila inferior completa
+        if all(valor == "X" for valor in self.tarjeta[self.tam-1]):
+            return True
+
+        # U (columna izquierda + fila inferior + columna derecha)
+        # Columna izquierda
+        if all(self.tarjeta[i][0] == "X" for i in range(self.tam)):
+            return True
+        # Columna derecha
+        if all(self.tarjeta[i][self.tam-1] == "X" for i in range(self.tam)):
+            return True
+        # Fila inferior
+        if all(valor == "X" for valor in self.tarjeta[self.tam-1]):
+            return True
+
+        # Cartón completo (todos los números marcados)
+        if all(valor == "X" for fila in self.tarjeta for valor in fila):
             return True
 
         return False
