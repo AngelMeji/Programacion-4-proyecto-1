@@ -14,7 +14,7 @@ Relación:
 class Jugador:
     def __init__(self, nombre: str):
         self.nombre = nombre
-        self.cartones: list = []
+        self.cartones = []  # Lista de cartones del jugador
         self.numeros_marcados = 0  # Contador de números marcados
 
     def agregar_carton(self, carton) -> None:
