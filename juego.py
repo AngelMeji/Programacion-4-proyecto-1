@@ -16,6 +16,7 @@ from bombo import Bombo
 from jugador import Jugador
 
 
+
 class Juego:
     def __init__(self, max_num: int):
         self.jugadores: list[Jugador] = []
