@@ -57,6 +57,10 @@ class Carton:
                 valor = numeros_columna[fila]
                 tarjeta[fila][col] = valor
                 usados.add(valor)
+                
+                # Casilla central libre
+        centro = self.tam // 2
+        tarjeta[centro][centro] = "X"
 
         return tarjeta
 
@@ -85,9 +89,48 @@ class Carton:
                     self.tarjeta[i][j] = "X"
                     return True
         return False
+
+    def _es_esquinas(self) -> bool:
+        """Verifica el patrón de las cuatro esquinas."""
+        return (
+            self.tarjeta[0][0] == "X"
+            and self.tarjeta[0][self.tam - 1] == "X"
+            and self.tarjeta[self.tam - 1][0] == "X"
+            and self.tarjeta[self.tam - 1][self.tam - 1] == "X"
+        )
+
+    def _es_cruz_central(self) -> bool:
+        """Verifica el patrón de cruz central (fila y columna del medio)."""
+        centro = self.tam // 2
+        return (
+            all(self.tarjeta[centro][col] == "X" for col in range(self.tam))
+            and all(self.tarjeta[fila][centro] == "X" for fila in range(self.tam))
+        )
+
+    def _es_borde(self) -> bool:
+        """Verifica el patrón de borde (todos los extremos de la tarjeta)."""
+        if not all(self.tarjeta[0][col] == "X" for col in range(self.tam)):
+            return False
+        if not all(self.tarjeta[self.tam - 1][col] == "X" for col in range(self.tam)):
+            return False
+        if not all(self.tarjeta[fila][0] == "X" for fila in range(self.tam)):
+            return False
+        if not all(self.tarjeta[fila][self.tam - 1] == "X" for fila in range(self.tam)):
+            return False
+        return True
+
+    def _es_cuadro_central(self) -> bool:
+        """Verifica el patrón del cuadro central 3x3."""
+        inicio = 1
+        fin = self.tam - 1
+        return all(
+            self.tarjeta[fila][col] == "X"
+            for fila in range(inicio, fin)
+            for col in range(inicio, fin)
+        )
     
     def verificar_bingo(self) -> bool:
-        """Verifica si el cartón tiene bingo (fila, columna o diagonal)."""
+        """Verifica si el cartón tiene bingo con varios patrones válidos."""
 
         # Filas
         for fila in self.tarjeta:
@@ -105,6 +148,25 @@ class Carton:
 
         # Diagonal secundaria
         if all(self.tarjeta[i][self.tam - 1 - i] == "X" for i in range(self.tam)):
+            return True
+        # Cuatro esquinas
+        if self._es_esquinas():
+            return True
+
+        # Cruz central
+        if self._es_cruz_central():
+            return True
+
+        # Borde completo
+        if self._es_borde():
+            return True
+
+        # Cuadro central 3x3
+        if self._es_cuadro_central():
+            return True
+
+        # Cuadro completo
+        if all(self.tarjeta[i][j] == "X" for i in range(self.tam) for j in range(self.tam)):
             return True
 
         return False
