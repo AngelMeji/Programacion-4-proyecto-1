@@ -10,7 +10,10 @@ Responsabilidades:
 
 Este archivo se usa para la demostración del sistema.
 """
-
+from gestor_jugaadores import GestorJugadores
+from validador_victoria import ValidadorVictoria
+from presentador_resultados import PresentadorResultados
+from bombo import Bombo
 from juego import Juego
 from jugador import Jugador
 from carton import Carton
@@ -58,8 +61,13 @@ def main():
         5,
     )
 
-    # Crear juego
-    juego = Juego(max_num)
+    # Crear juego con todas sus dependencias
+    juego = Juego(
+        Bombo(max_num),
+        GestorJugadores(),
+        ValidadorVictoria(),
+        PresentadorResultados()
+    )
 
     # Crear jugadores (mínimo 3 como pide la rúbrica)
     j1 = Jugador("Juan")

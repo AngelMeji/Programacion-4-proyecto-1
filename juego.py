@@ -47,13 +47,18 @@ class Juego:
         self._presentador = presentador
         self._ganador: Optional[Jugador] = None
 
+    @property
+    def jugadores(self) -> list[Jugador]:
+        """Retorna la lista de jugadores registrados en el juego."""
+        return self._gestor.obtener_jugadores()
+
     def agregar_jugador(self, jugador: Jugador) -> None:
         """Delega la adición de jugadores al gestor especializado."""
-        self._gestor.agregar(jugador)
+        self._gestor.agregar_jugador(jugador)
 
     def eliminar_jugador(self, jugador: Jugador) -> None:
         """Delega la eliminación de jugadores al gestor especializado."""
-        self._gestor.eliminar(jugador)
+        self._gestor.eliminar_jugador(jugador)
 
     def jugar(self) -> None:
         """
@@ -77,7 +82,7 @@ class Juego:
 
                 self._presentador.mostrar_turno(numero, turno)
 
-                for jugador in self._gestor.obtener_todos():
+                for jugador in self._gestor.obtener_jugadores():
                     marcados_antes = jugador.numeros_marcados
                     jugador.marcar_numero(numero)
 
@@ -100,7 +105,7 @@ class Juego:
                 historial=self._bombo.obtener_historial(),
                 resumen_jugadores=[
                     (j.nombre, j.numeros_marcados)
-                    for j in self._gestor.obtener_todos()
+                    for j in self._gestor.obtener_jugadores()
                 ]
             )
 
