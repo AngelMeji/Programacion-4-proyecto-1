@@ -1,219 +1,131 @@
 """
-Clase base del sistema. Representa un cartón de bingo.
-
-Responsabilidades:
-- Generar la tarjeta 5x5 con números válidos.
-- Permitir marcar números.
-- Verificar si se ha completado el bingo.
-
-Relación:
-- Es la clase base que será extendida por CartonDoble (herencia).
+Módulo: carton.py
+Responsabilidad única: Representar el estado de un cartón de bingo y permitir marcar números.
+Razón para cambiar: Si cambia la estructura interna de almacenamiento o la lógica de marcado.
 """
 
-import random
+from typing import Optional
+from exceptions import NumeroInvalidoError
+
 
 class Carton:
-    """Generador de tarjetas de Bingo"""
-
-    def __init__(self, palabra="BINGO", max_num=75):
+    """
+    Representa el estado de un cartón de bingo.
+    
+    Esta clase SOLO maneja:
+    - Almacenamiento de la tarjeta y palabra
+    - Marcado de números
+    - Consulta del estado de marcación
+    
+    NO genera tarjetas, NO verifica patrones, NO imprime.
+    """
+    
+    def __init__(self, palabra: str, max_num: int, tarjeta: Optional[list[list]] = None):
+        """
+        Inicializa un cartón con una tarjeta existente o vacía.
+        
+        Args:
+            palabra: Palabra de 5 letras para los encabezados.
+            max_num: Número máximo del juego (50-90, múltiplo de 5).
+            tarjeta: Matriz 5x5 generada externamente. Si es None, crea una vacía.
+        """
         self.palabra = palabra.upper()
-        self.tam = len(self.palabra)
+        self.tam = len(self.palabra)  # Siempre 5
         self.max_num = max_num
-        self._validar_parametros()
-        self.intervalo_columna = self.max_num // self.tam
-
-        # El cartón guarda su propia tarjeta
-        self.tarjeta = self.generar_tarjeta()
-
-    def _validar_parametros(self):
-        """Valida la palabra y el máximo número del juego."""
-        if self.tam != 5:
-            raise ValueError("La palabra debe tener exactamente 5 letras.")
-        if len(set(self.palabra)) != self.tam:
-            raise ValueError("La palabra no debe tener letras repetidas.")
-        if not (50 <= self.max_num <= 90):
-            raise ValueError("El máximo número debe estar entre 50 y 90.")
-        if self.max_num % self.tam != 0:
-            raise ValueError("El máximo número debe ser múltiplo de 5.")
-
-    def _rango_columna(self, col):
-        """Devuelve el rango [min, max] para una columna."""
-        minimo = col * self.intervalo_columna + 1
-        maximo = (col + 1) * self.intervalo_columna
-        return minimo, maximo
-
-    def generar_tarjeta(self):
-        """Genera una tarjeta aleatoria 5x5 sin números repetidos."""
-        tarjeta = [[0] * self.tam for _ in range(self.tam)]
-        usados = set()
-
-        for col in range(self.tam):
-            minimo, maximo = self._rango_columna(col)
-            numeros_columna = random.sample(
-                [n for n in range(minimo, maximo + 1) if n not in usados],
-                self.tam,
-            )
-            for fila in range(self.tam):
-                valor = numeros_columna[fila]
-                tarjeta[fila][col] = valor
-                usados.add(valor)
-                
-                # Casilla central libre
+        
+        # Recibe la tarjeta generada externamente (inyección de dependencia)
+        self.tarjeta = tarjeta if tarjeta is not None else self._crear_matriz_vacia()
+        
+        # Conjunto de posiciones marcadas: {(fila, col), ...}
+        self._marcados: set[tuple[int, int]] = set()
+        
+        # Marcar automáticamente la casilla central si ya es "X"
         centro = self.tam // 2
-        tarjeta[centro][centro] = "X"
-
-        return tarjeta
-
-    def generar_varias_tarjetas(self, cantidad):
-        """Genera varias tarjetas."""
-        return [self.generar_tarjeta() for _ in range(cantidad)]
-
-    def imprimir(self) -> None:
-        """Imprime la tarjeta del cartón."""
-        print("   ".join(self.palabra))
-        print("-" * (self.tam * 3))
-        for fila in self.tarjeta:
-            print("  ".join("{:2}".format(n) if n != "X" else " X" for n in fila))
-
+        if self.tarjeta[centro][centro] == "X":
+            self._marcados.add((centro, centro))
+    
     def marcar_numero(self, numero: int) -> bool:
         """
-        Marca un número en la tarjeta si existe.
-
-        Retorna:
-        - True si se marcó
-        - False si no estaba en el cartón
+        Marca un número en la tarjeta si existe y no está marcado.
+        
+        Args:
+            numero: Número a marcar.
+            
+        Returns:
+            bool: True si se marcó, False si no estaba en el cartón.
+            
+        Raises:
+            NumeroInvalidoError: Si el número está fuera de rango.
         """
+        if not (1 <= numero <= self.max_num):
+            raise NumeroInvalidoError(
+                f"El número {numero} está fuera del rango [1, {self.max_num}]"
+            )
+        
         for i in range(self.tam):
             for j in range(self.tam):
-                if self.tarjeta[i][j] == numero:
-                    self.tarjeta[i][j] = "X"
+                if self.tarjeta[i][j] == numero and (i, j) not in self._marcados:
+                    self._marcados.add((i, j))
                     return True
         return False
-
-    def _es_esquinas(self) -> bool:
-        """Verifica el patrón de las cuatro esquinas."""
-        return (
-            self.tarjeta[0][0] == "X"
-            and self.tarjeta[0][self.tam - 1] == "X"
-            and self.tarjeta[self.tam - 1][0] == "X"
-            and self.tarjeta[self.tam - 1][self.tam - 1] == "X"
-        )
-
-    def _es_cruz_central(self) -> bool:
-        """Verifica el patrón de cruz central (fila y columna del medio)."""
-        centro = self.tam // 2
-        return (
-            all(self.tarjeta[centro][col] == "X" for col in range(self.tam))
-            and all(self.tarjeta[fila][centro] == "X" for fila in range(self.tam))
-        )
-
-    def _es_borde(self) -> bool:
-        """Verifica el patrón de borde (todos los extremos de la tarjeta)."""
-        if not all(self.tarjeta[0][col] == "X" for col in range(self.tam)):
-            return False
-        if not all(self.tarjeta[self.tam - 1][col] == "X" for col in range(self.tam)):
-            return False
-        if not all(self.tarjeta[fila][0] == "X" for fila in range(self.tam)):
-            return False
-        if not all(self.tarjeta[fila][self.tam - 1] == "X" for fila in range(self.tam)):
-            return False
-        return True
-
-    def _es_cuadro_central(self) -> bool:
-        """Verifica el patrón del cuadro central 3x3."""
-        inicio = 1
-        fin = self.tam - 1
-        return all(
-            self.tarjeta[fila][col] == "X"
-            for fila in range(inicio, fin)
-            for col in range(inicio, fin)
-        )
     
-    def verificar_bingo(self, modo: str | None = None) -> bool:
-        """Verifica si el cartón tiene bingo.
-
-        Args:
-            modo: Opcional. Si se pasa un modo, solo se valida ese tipo
-                de patrón. Valores aceptados: 'horizontal', 'vertical',
-                'diagonal', 'filas_columnas', 'esquinas', 'cruz', 'borde',
-                'central', 'completo'. Si es None o 'todos', se mantiene
-                el comportamiento completo original.
+    def esta_marcado(self, fila: int, col: int) -> bool:
         """
-
-        # Normaliza el modo
-        if modo is None:
-            modo = "todos"
-        modo = modo.lower()
-
-        def filas() -> bool:
+        Consulta si una posición específica está marcada.
+        
+        Args:
+            fila: Índice de fila (0-4).
+            col: Índice de columna (0-4).
+            
+        Returns:
+            bool: True si la posición está marcada o es la casilla libre.
+        """
+        if not (0 <= fila < self.tam and 0 <= col < self.tam):
+            return False
+        return (fila, col) in self._marcados or self.tarjeta[fila][col] == "X"
+    
+    def obtener_tarjeta(self) -> list[list]:
+        """
+        Devuelve una copia de la matriz de la tarjeta (solo lectura).
+        
+        Returns:
+            list[list]: Copia profunda de la tarjeta con valores actuales.
+        """
+        return [fila.copy() for fila in self.tarjeta]
+    
+    def obtener_marcados(self) -> set[tuple[int, int]]:
+        """
+        Devuelve una copia del conjunto de posiciones marcadas.
+        
+        Returns:
+            set: Copia del conjunto de tuplas (fila, col) marcadas.
+        """
+        return self._marcados.copy()
+    
+    def _crear_matriz_vacia(self) -> list[list]:
+        """Crea una matriz 5x5 inicial con ceros."""
+        return [[0] * self.tam for _ in range(self.tam)]
+    
+    # Métodos de presentación delegados a una clase externa (SRP)
+    def imprimir(self, presentador=None) -> None:
+        """
+        Imprime el cartón usando un presentador externo.
+        
+        Args:
+            presentador: Objeto con método imprimir_carton(carton: Carton).
+                        Si es None, usa impresión básica por consola.
+        """
+        if presentador and hasattr(presentador, 'imprimir_carton'):
+            presentador.imprimir_carton(self)
+        else:
+            # Fallback básico (podría moverse a PresentadorCarton después)
+            print("   ".join(self.palabra))
+            print("-" * (self.tam * 3))
             for fila in self.tarjeta:
-                if all(valor == "X" for valor in fila):
-                    return True
-            return False
-
-        def columnas() -> bool:
-            for col in range(self.tam):
-                if all(self.tarjeta[fila][col] == "X" for fila in range(self.tam)):
-                    return True
-            return False
-
-        def diagonales() -> bool:
-            if all(self.tarjeta[i][i] == "X" for i in range(self.tam)):
-                return True
-            if all(self.tarjeta[i][self.tam - 1 - i] == "X" for i in range(self.tam)):
-                return True
-            return False
-
-        def completo() -> bool:
-            return all(self.tarjeta[i][j] == "X" for i in range(self.tam) for j in range(self.tam))
-
-        # Mapear modos a comprobaciones específicas
-        if modo in ("todos", ""):
-            # Comportamiento original: evaluar todos los patrones
-            if filas():
-                return True
-            if columnas():
-                return True
-            if diagonales():
-                return True
-            if self._es_esquinas():
-                return True
-            if self._es_cruz_central():
-                return True
-            if self._es_borde():
-                return True
-            if self._es_cuadro_central():
-                return True
-            if completo():
-                return True
-            return False
-
-        if modo == "horizontal":
-            return filas()
-
-        if modo == "vertical":
-            return columnas()
-
-        if modo == "diagonal":
-            return diagonales()
-
-        if modo == "filas_columnas":
-            return filas() or columnas()
-
-        if modo == "esquinas":
-            return self._es_esquinas()
-
-        if modo == "cruz":
-            return self._es_cruz_central()
-
-        if modo == "borde":
-            return self._es_borde()
-
-        if modo == "central":
-            return self._es_cuadro_central()
-
-        if modo == "completo":
-            return completo()
-
-        # Si se pasa un modo desconocido, no declarar ganador por seguridad
-        return False
+                linea = []
+                for valor in fila:
+                    if valor == "X" or (fila.index(valor), list(self.tarjeta).index(fila)) in self._marcados:
+                        linea.append(" X")
+                    else:
+                        linea.append(f"{valor:2}")
+                print("  ".join(linea))
