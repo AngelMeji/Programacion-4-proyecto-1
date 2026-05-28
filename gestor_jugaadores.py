@@ -7,6 +7,18 @@ class GestorJugadores:
     def __init__(self):
         self.jugadores: list[Jugador] = []
 
+    def buscar_jugador_por_nombre(self, nombre: str) -> Optional[Jugador]:
+        """Busca un jugador por su nombre sin distinguir mayúsculas."""
+        nombre = nombre.strip().lower()
+        for jugador in self.jugadores:
+            if jugador.nombre.strip().lower() == nombre:
+                return jugador
+        return None
+
+    def obtener_nombres_jugadores(self) -> list[str]:
+        """Devuelve la lista de nombres de los jugadores registrados."""
+        return [jugador.nombre for jugador in self.jugadores]
+
     def agregar_jugador(self, jugador: Jugador) -> None:
         """Agrega un jugador a la lista."""
         self.jugadores.append(jugador)

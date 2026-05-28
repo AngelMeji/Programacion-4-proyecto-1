@@ -6,7 +6,7 @@ Delega: gestión de jugadores, validación de victoria, extracción de números 
 Razón para cambiar: Si cambia la secuencia de turnos, las condiciones de parada o la coordinación entre componentes.
 """
 
-from typing import Optional
+from typing import Optional, Callable
 from bombo import Bombo
 from jugador import Jugador
 from gestor_jugaadores import GestorJugadores
@@ -60,10 +60,30 @@ class Juego:
         """Delega la eliminación de jugadores al gestor especializado."""
         self._gestor.eliminar_jugador(jugador)
 
-    def jugar(self) -> None:
+    def buscar_jugador_por_nombre(self, nombre: str) -> Optional[Jugador]:
+        """Busca un jugador activo por su nombre."""
+        return self._gestor.buscar_jugador_por_nombre(nombre)
+
+    def hay_jugadores(self) -> bool:
+        """Indica si aún hay jugadores activos en el juego."""
+        return self._gestor.hay_jugadores()
+
+    def retirar_jugador_por_nombre(self, nombre: str) -> bool:
+        """Retira un jugador por nombre y retorna si la eliminación fue exitosa."""
+        jugador = self.buscar_jugador_por_nombre(nombre)
+        if jugador:
+            self._gestor.eliminar_jugador(jugador)
+            return True
+        return False
+
+    def jugar(self, continuar: Optional[Callable[[int], bool]] = None) -> None:
         """
         Ejecuta la partida completa hasta que haya un ganador o se agote el bombo.
         Delega responsabilidades a los componentes inyectados (DIP).
+
+        Args:
+            continuar: Callback opcional que se ejecuta al final de cada turno. Si retorna False,
+                la partida se detiene inmediatamente.
         """
         try:
             # Validación inicial
@@ -73,7 +93,7 @@ class Juego:
             self._presentador.inicio_partida()
             turno = 1
 
-            while self._bombo.hay_numeros() and self._ganador is None:
+            while self._bombo.hay_numeros() and self._ganador is None and self._gestor.hay_jugadores():
                 try:
                     numero = self._bombo.extraer_numero()
                 except Exception as e:
@@ -82,7 +102,7 @@ class Juego:
 
                 self._presentador.mostrar_turno(numero, turno)
 
-                for jugador in self._gestor.obtener_jugadores():
+                for jugador in list(self._gestor.obtener_jugadores()):
                     marcados_antes = jugador.numeros_marcados
                     jugador.marcar_numero(numero)
 
@@ -96,6 +116,16 @@ class Juego:
                     if posible_ganador:
                         self._ganador = posible_ganador
                         break
+
+                if self._ganador is not None:
+                    break
+
+                if not self._gestor.hay_jugadores():
+                    print("\nNo quedan jugadores activos. La partida terminará.")
+                    break
+
+                if continuar is not None and not continuar(turno):
+                    break
 
                 turno += 1
 

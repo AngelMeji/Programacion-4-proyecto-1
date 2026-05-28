@@ -50,6 +50,101 @@ def pedir_entero(mensaje: str, minimo: int, maximo: int, multiplo: int = None) -
 
         return n
 
+
+def pedir_texto(mensaje: str) -> str:
+    """Pide un texto no vacío."""
+    while True:
+        texto = input(mensaje).strip()
+        if texto:
+            return texto
+        print("El texto no puede estar vacío.\n")
+
+
+def mostrar_jugadores(juego: Juego) -> None:
+    """Muestra la lista de jugadores activos."""
+    if not juego.jugadores:
+        print("No hay jugadores activos.")
+        return
+
+    print("Jugadores registrados:")
+    for indice, jugador in enumerate(juego.jugadores, 1):
+        print(f"  {indice}. {jugador.nombre}")
+
+
+def agregar_jugadores_predeterminados(juego: Juego, palabra: str, max_num: int) -> None:
+    """Agrega jugadores de ejemplo si aún no existen."""
+    ejemplos = [
+        ("Juan", CartonDoble),
+        ("Ana", CartonDoble),
+        ("Carlos", Carton),
+    ]
+
+    for nombre, clase_carton in ejemplos:
+        if juego.buscar_jugador_por_nombre(nombre) is None:
+            jugador = Jugador(nombre)
+            jugador.agregar_carton(clase_carton(palabra, max_num))
+            juego.agregar_jugador(jugador)
+            print(f"Se registró el jugador de ejemplo: {nombre}")
+
+
+def registrar_jugador_interactivo(juego: Juego, palabra: str, max_num: int) -> None:
+    """Registra un nuevo jugador con cartón normal o doble."""
+    nombre = pedir_texto("Ingrese el nombre del nuevo jugador: ")
+    if juego.buscar_jugador_por_nombre(nombre) is not None:
+        print(f"Ya existe un jugador con el nombre '{nombre}'.\n")
+        return
+
+    tipo_carton = pedir_entero(
+        "Seleccione el tipo de cartón (1 = Normal, 2 = Doble): ",
+        1,
+        2,
+    )
+
+    jugador = Jugador(nombre)
+    if tipo_carton == 1:
+        jugador.agregar_carton(Carton(palabra, max_num))
+    else:
+        jugador.agregar_carton(CartonDoble(palabra, max_num))
+
+    juego.agregar_jugador(jugador)
+    print(f"Jugador '{nombre}' registrado con éxito.\n")
+
+
+def retirar_jugador_interactivo(juego: Juego) -> None:
+    """Retira un jugador activo del juego."""
+    if not juego.jugadores:
+        print("No hay jugadores para retirar.\n")
+        return
+
+    mostrar_jugadores(juego)
+    nombre = pedir_texto("Ingrese el nombre del jugador a retirar: ")
+    if juego.retirar_jugador_por_nombre(nombre):
+        print(f"Jugador '{nombre}' retirado del juego.\n")
+    else:
+        print(f"No se encontró un jugador con el nombre '{nombre}'.\n")
+
+
+def tomar_decision_post_turno(juego: Juego, palabra: str, max_num: int, turno: int) -> bool:
+    """Permite registrar o retirar jugadores al final de cada turno."""
+    print("\nOpciones disponibles:")
+    print("  1. Continuar partida")
+    print("  2. Retirar jugador")
+    print("  3. Registrar nuevo jugador")
+    print("  4. Terminar la partida")
+
+    opcion = pedir_entero("Seleccione una opción: ", 1, 4)
+    if opcion == 2:
+        retirar_jugador_interactivo(juego)
+        return juego.hay_jugadores()
+    if opcion == 3:
+        registrar_jugador_interactivo(juego, palabra, max_num)
+        return True
+    if opcion == 4:
+        print("Partida finalizada por el usuario.\n")
+        return False
+    return True
+
+
 def main():
     print("=== CONFIGURACIÓN DEL JUEGO DE BINGO ===\n")
 
@@ -69,24 +164,26 @@ def main():
         PresentadorResultados()
     )
 
-    # Crear jugadores (mínimo 3 como pide la rúbrica)
-    j1 = Jugador("Juan")
-    j2 = Jugador("Ana")
-    j3 = Jugador("Carlos")
+    print("\n=== REGISTRO DE JUGADORES ===")
+    while True:
+        print("\n1. Agregar jugador")
+        print("2. Retirar jugador")
+        print("3. Agregar jugadores de ejemplo")
+        print("4. Iniciar partida")
 
-    # Asignar cartones
-    j1.agregar_carton(CartonDoble(palabra, max_num))  # requisito: al menos uno doble
+        opcion = pedir_entero("Seleccione una opción: ", 1, 4)
+        if opcion == 1:
+            registrar_jugador_interactivo(juego, palabra, max_num)
+        elif opcion == 2:
+            retirar_jugador_interactivo(juego)
+        elif opcion == 3:
+            agregar_jugadores_predeterminados(juego, palabra, max_num)
+        elif opcion == 4:
+            if len(juego.jugadores) < 3:
+                print("Debe haber al menos 3 jugadores registrados antes de iniciar la partida.\n")
+                continue
+            break
 
-    j2.agregar_carton(CartonDoble(palabra, max_num))
-
-    j3.agregar_carton(Carton(palabra, max_num))
-
-    # Agregar jugadores al juego
-    juego.agregar_jugador(j1)
-    juego.agregar_jugador(j2)
-    juego.agregar_jugador(j3)
-
-    # Mostrar cartones iniciales
     print("\n=== CARTONES INICIALES ===\n")
     for jugador in juego.jugadores:
         print(f"Jugador: {jugador.nombre}")
@@ -94,8 +191,7 @@ def main():
             carton.imprimir()  # POLIMORFISMO
         print("\n" + "=" * 40)
 
-    # Ejecutar el juego
-    juego.jugar()
+    juego.jugar(lambda turno: tomar_decision_post_turno(juego, palabra, max_num, turno))
 
 
 if __name__ == "__main__":
