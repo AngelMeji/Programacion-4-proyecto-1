@@ -1,4 +1,4 @@
-# 📄 juego.py
+
 """
 Módulo: juego.py
 Responsabilidad única: Orquestar el flujo de la partida de Bingo.

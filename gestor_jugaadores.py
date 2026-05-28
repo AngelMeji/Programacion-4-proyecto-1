@@ -1,3 +1,5 @@
+"""se encarga exclusivamente de la colección de jugadores (agregar, eliminar, obtener)"""
+
 from typing import Optional
 from jugador import Jugador
 

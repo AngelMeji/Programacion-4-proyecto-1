@@ -1,4 +1,4 @@
-# 📄 presentador_resultados.py
+
 """
 Módulo: presentador_resultados.py
 Responsabilidad única: Formatear y mostrar la información del juego al usuario (capa de presentación).
