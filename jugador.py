@@ -34,6 +34,10 @@ class Jugador:
                 marcados += 1
         self.numeros_marcados += marcados
 
-    def verificar_bingo(self) -> bool:
-        """Verifica si alguno de sus cartones tiene bingo."""
-        return any(carton.verificar_bingo() for carton in self.cartones)
+    def verificar_bingo(self, modo: str | None = None) -> bool:
+        """Verifica si alguno de sus cartones tiene bingo.
+
+        Args:
+            modo: Opcional, se pasa al cartón para validar solo ese patrón.
+        """
+        return any(carton.verificar_bingo(modo) for carton in self.cartones)

@@ -60,6 +60,41 @@ def pedir_texto(mensaje: str) -> str:
         print("El texto no puede estar vacío.\n")
 
 
+def pedir_modo() -> str | None:
+    """Pide al usuario seleccionar el modo de victoria para la partida.
+
+    Retorna una cadena que representa el modo o None para el modo completo.
+    """
+    opciones = {
+        1: ("horizontal", "Filas completas"),
+        2: ("vertical", "Columnas completas"),
+        3: ("diagonal", "Diagonales"),
+        4: ("filas_columnas", "Filas o Columnas"),
+        5: (None, "Todas las formas (por defecto)")
+    }
+
+    print("\nSeleccione la forma de jugar:")
+    for k, v in opciones.items():
+        print(f"  {k}. {v[1]}")
+
+    while True:
+        try:
+            sel = int(input("Opción: ").strip())
+        except ValueError:
+            print("Seleccione una opción válida (número).\n")
+            continue
+
+        if sel in opciones:
+            modo = opciones[sel][0]
+            if modo is None:
+                print("Se usará el modo por defecto: todas las formas.\n")
+            else:
+                print(f"Se jugará con la regla: {opciones[sel][1]}.\n")
+            return modo
+        else:
+            print("Seleccione una opción válida.\n")
+
+
 def mostrar_jugadores(juego: Juego) -> None:
     """Muestra la lista de jugadores activos."""
     if not juego.jugadores:
@@ -156,11 +191,13 @@ def main():
         5,
     )
 
+    modo = pedir_modo()
+
     # Crear juego con todas sus dependencias
     juego = Juego(
         Bombo(max_num),
         GestorJugadores(),
-        ValidadorVictoria(),
+        ValidadorVictoria(modo),
         PresentadorResultados()
     )
 

@@ -129,44 +129,91 @@ class Carton:
             for col in range(inicio, fin)
         )
     
-    def verificar_bingo(self) -> bool:
-        """Verifica si el cartón tiene bingo con varios patrones válidos."""
+    def verificar_bingo(self, modo: str | None = None) -> bool:
+        """Verifica si el cartón tiene bingo.
 
-        # Filas
-        for fila in self.tarjeta:
-            if all(valor == "X" for valor in fila):
+        Args:
+            modo: Opcional. Si se pasa un modo, solo se valida ese tipo
+                de patrón. Valores aceptados: 'horizontal', 'vertical',
+                'diagonal', 'filas_columnas', 'esquinas', 'cruz', 'borde',
+                'central', 'completo'. Si es None o 'todos', se mantiene
+                el comportamiento completo original.
+        """
+
+        # Normaliza el modo
+        if modo is None:
+            modo = "todos"
+        modo = modo.lower()
+
+        def filas() -> bool:
+            for fila in self.tarjeta:
+                if all(valor == "X" for valor in fila):
+                    return True
+            return False
+
+        def columnas() -> bool:
+            for col in range(self.tam):
+                if all(self.tarjeta[fila][col] == "X" for fila in range(self.tam)):
+                    return True
+            return False
+
+        def diagonales() -> bool:
+            if all(self.tarjeta[i][i] == "X" for i in range(self.tam)):
                 return True
-
-        # Columnas
-        for col in range(self.tam):
-            if all(self.tarjeta[fila][col] == "X" for fila in range(self.tam)):
+            if all(self.tarjeta[i][self.tam - 1 - i] == "X" for i in range(self.tam)):
                 return True
+            return False
 
-        # Diagonal principal
-        if all(self.tarjeta[i][i] == "X" for i in range(self.tam)):
-            return True
+        def completo() -> bool:
+            return all(self.tarjeta[i][j] == "X" for i in range(self.tam) for j in range(self.tam))
 
-        # Diagonal secundaria
-        if all(self.tarjeta[i][self.tam - 1 - i] == "X" for i in range(self.tam)):
-            return True
-        # Cuatro esquinas
-        if self._es_esquinas():
-            return True
+        # Mapear modos a comprobaciones específicas
+        if modo in ("todos", ""):
+            # Comportamiento original: evaluar todos los patrones
+            if filas():
+                return True
+            if columnas():
+                return True
+            if diagonales():
+                return True
+            if self._es_esquinas():
+                return True
+            if self._es_cruz_central():
+                return True
+            if self._es_borde():
+                return True
+            if self._es_cuadro_central():
+                return True
+            if completo():
+                return True
+            return False
 
-        # Cruz central
-        if self._es_cruz_central():
-            return True
+        if modo == "horizontal":
+            return filas()
 
-        # Borde completo
-        if self._es_borde():
-            return True
+        if modo == "vertical":
+            return columnas()
 
-        # Cuadro central 3x3
-        if self._es_cuadro_central():
-            return True
+        if modo == "diagonal":
+            return diagonales()
 
-        # Cuadro completo
-        if all(self.tarjeta[i][j] == "X" for i in range(self.tam) for j in range(self.tam)):
-            return True
+        if modo == "filas_columnas":
+            return filas() or columnas()
 
+        if modo == "esquinas":
+            return self._es_esquinas()
+
+        if modo == "cruz":
+            return self._es_cruz_central()
+
+        if modo == "borde":
+            return self._es_borde()
+
+        if modo == "central":
+            return self._es_cuadro_central()
+
+        if modo == "completo":
+            return completo()
+
+        # Si se pasa un modo desconocido, no declarar ganador por seguridad
         return False
