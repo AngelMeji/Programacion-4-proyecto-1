@@ -6,6 +6,7 @@ Razón para cambiar: Si cambia la estructura interna de almacenamiento o la lóg
 
 from typing import Optional
 from exceptions import NumeroInvalidoError
+from generador_carton import GeneradorCarton
 
 
 class Carton:
@@ -34,8 +35,8 @@ class Carton:
         self.max_num = max_num
         
         # Recibe la tarjeta generada externamente (inyección de dependencia)
-        self.tarjeta = tarjeta if tarjeta is not None else self._crear_matriz_vacia()
-        
+        self.tarjeta = tarjeta if tarjeta is not None else self._generar_tarjeta()
+
         # Conjunto de posiciones marcadas: {(fila, col), ...}
         self._marcados: set[tuple[int, int]] = set()
         
@@ -105,6 +106,19 @@ class Carton:
     def _crear_matriz_vacia(self) -> list[list]:
         """Crea una matriz 5x5 inicial con ceros."""
         return [[0] * self.tam for _ in range(self.tam)]
+
+    def _generar_tarjeta(self) -> list[list]:
+        """Genera una tarjeta aleatoria usando el generador de cartones."""
+        generador = GeneradorCarton(self.palabra, self.max_num)
+        return generador.generar()
+
+    def verificar_bingo(self, modo: str | None = None) -> bool:
+        """Verifica si este cartón tiene bingo según el modo seleccionado."""
+        from verificador_bingo import VerificadorBingo
+
+        verificador = VerificadorBingo()
+        tiene_bingo, _ = verificador.tiene_bingo(self, modo)
+        return tiene_bingo
     
     # Métodos de presentación delegados a una clase externa (SRP)
     def imprimir(self, presentador=None) -> None:
@@ -121,10 +135,10 @@ class Carton:
             # Fallback básico (podría moverse a PresentadorCarton después)
             print("   ".join(self.palabra))
             print("-" * (self.tam * 3))
-            for fila in self.tarjeta:
+            for i, fila in enumerate(self.tarjeta):
                 linea = []
-                for valor in fila:
-                    if valor == "X" or (fila.index(valor), list(self.tarjeta).index(fila)) in self._marcados:
+                for j, valor in enumerate(fila):
+                    if (i, j) in self._marcados or valor == "X":
                         linea.append(" X")
                     else:
                         linea.append(f"{valor:2}")
