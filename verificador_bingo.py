@@ -53,7 +53,7 @@ class VerificadorBingo:
         """
         self._patrones = patrones if patrones is not None else self.PATRONES_POR_DEFECTO.copy()
     
-    def tiene_bingo(self, carton: Carton, modo: Optional[str] = None) -> tuple[bool, str]:
+    def tiene_bingo(self, carton: "Carton", modo: Optional[str] = None) -> tuple[bool, str]:
         """
         Verifica si el cartón tiene bingo según el modo especificado.
         
