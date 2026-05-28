@@ -35,20 +35,24 @@ class CartonDoble(Carton):
 
         return marcado_total
     
-    def verificar_bingo(self) -> bool:
+    def verificar_bingo(self, modo: str | None = None) -> bool:
         """
         Verifica si alguna de las dos tarjetas tiene bingo.
+
+        Args:
+            modo: Opcional, se pasa a la comprobación del cartón base para
+                validar solo un patrón específico.
         """
 
         original = self.tarjeta  # guardamos la referencia original para restaurarla después
-        
+
         self.tarjeta = self.tarjeta1
-        if super().verificar_bingo():
+        if super().verificar_bingo(modo):
             self.tarjeta = original
             return True
 
         self.tarjeta = self.tarjeta2
-        resultado = super().verificar_bingo()
+        resultado = super().verificar_bingo(modo)
 
         self.tarjeta = original
         return resultado
