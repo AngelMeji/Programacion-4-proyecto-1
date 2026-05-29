@@ -12,22 +12,12 @@ from juego import Juego
 from jugador import Jugador
 from carton import Carton
 from carton_doble import CartonDoble
-
-# Imports OCP/DIP para validación
-from verificador_patron import (
-    VerificadorFila, VerificadorColumna, VerificadorDiagonal,
-    VerificadorEsquinas, VerificadorCruz, VerificadorBorde,
-    VerificadorCentral, VerificadorCompleto
-)
+from interfaces import IValidadorVictoria
 from validador_victoria import ValidadorVictoria
 
 
-def configurar_validador_por_modo(modo: str) -> ValidadorVictoria:
-    """Devuelve un `ValidadorVictoria` configurado con el modo solicitado.
-
-    `Juego` espera un validador con método `verificar_ganador(jugadores)`;
-    `ValidadorVictoria` implementa esa interfaz y delega a los cartones.
-    """
+def configurar_validador_por_modo(modo: str) -> IValidadorVictoria:
+    """Devuelve un validador que cumple el contrato `IValidadorVictoria`."""
     return ValidadorVictoria(modo)
 
 

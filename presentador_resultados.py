@@ -8,9 +8,10 @@ o se requiere silenciar la salida para pruebas automatizadas.
 
 from typing import Optional
 from jugador import Jugador
+from interfaces import IPresentadorResultados
 
 
-class PresentadorResultados:
+class PresentadorResultados(IPresentadorResultados):
     """
     Gestiona toda la salida por consola del juego de Bingo.
     No contiene lógica de negocio, validación ni gestión de estado.

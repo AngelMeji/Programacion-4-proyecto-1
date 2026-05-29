@@ -1,7 +1,8 @@
 import random
+from interfaces import IBombo
 
 
-class Bombo:
+class Bombo(IBombo):
     """
     Representa el bombo del juego de bingo.
 

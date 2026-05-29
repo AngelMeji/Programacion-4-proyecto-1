@@ -6,9 +6,10 @@ Razón para cambiar: Si cambian las reglas de generación (rangos, distribución
 
 import random
 from exceptions import CartonConfigError, GeneracionCartonError
+from interfaces import IGeneradorCarton
 
 
-class GeneradorCarton:
+class GeneradorCarton(IGeneradorCarton):
     """Genera tarjetas de bingo 5x5 con números únicos por columna."""
     
     def __init__(self, palabra: str, max_num: int):

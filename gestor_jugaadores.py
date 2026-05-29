@@ -2,8 +2,9 @@
 
 from typing import Optional
 from jugador import Jugador
+from interfaces import IGestorJugadores
 
-class GestorJugadores:
+class GestorJugadores(IGestorJugadores):
     """Responsabilidad única: administrar la colección de jugadores."""
     """Clase auxiliar para gestionar jugadores en el juego."""
     def __init__(self):

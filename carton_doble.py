@@ -1,7 +1,9 @@
 # carton_doble.py - Refactorizado para LSP
+from typing import Optional
 from carton import Carton
 from generador_carton import GeneradorCarton
 from verificador_bingo import VerificadorBingo
+from interfaces import IGeneradorCarton, IVerificadorBingo
 
 
 class CartonDoble(Carton):
@@ -12,25 +14,28 @@ class CartonDoble(Carton):
     Cualquier función que espere un Carton puede recibir un CartonDoble sin modificaciones.
     """
     
-    def __init__(self, palabra: str, max_num: int, 
-                 verificador: VerificadorBingo = None):
-        # 1. Generar ambas tarjetas
-        gen = GeneradorCarton(palabra, max_num)
-        t1 = gen.generar()
-        t2 = gen.generar()
-        
-        # 2. Inicializar como Carton normal (hereda validación y atributos base)
-        super().__init__(palabra, max_num, t1)
-        
-        # 3. Configurar segunda tarjeta y estados independientes
-        # Guardar explícitamente la primera tarjeta para acceso directo
-        self.tarjeta1 = t1
+    def __init__(
+        self,
+        palabra: str,
+        max_num: int,
+        generador: Optional[IGeneradorCarton] = None,
+        verificador: Optional[IVerificadorBingo] = None,
+    ):
+        # 1. Generar ambas tarjetas mediante inyección de dependencia
+        self._generador = generador if generador is not None else GeneradorCarton(palabra, max_num)
+        t1 = self._generador.generar()
+        t2 = self._generador.generar()
 
+        # 2. Inicializar como Carton normal (hereda validación y atributos base)
+        super().__init__(palabra, max_num, t1, generador=self._generador, verificador=verificador)
+
+        # 3. Configurar segunda tarjeta y estados independientes
+        self.tarjeta1 = t1
         self.tarjeta2 = t2
         self._marcados1 = self._marcados.copy()  # Centro ya marcado por super()
         self._marcados2: set[tuple[int, int]] = {(2, 2)}
-        self._verificador = verificador or VerificadorBingo()
-        
+        self._verificador = verificador if verificador is not None else self._verificador
+
         # Compatibilidad LSP: por defecto apunta a la primera tarjeta
         self.tarjeta = self.tarjeta1
     
@@ -54,14 +59,27 @@ class CartonDoble(Carton):
                 (fila, col) in self._marcados2 or self.tarjeta2[fila][col] == "X")
     
     def verificar_bingo(self, modo: str = None) -> bool:
-        c1 = Carton(self.palabra, self.max_num, self.tarjeta1)
+        c1 = Carton(
+            self.palabra,
+            self.max_num,
+            self.tarjeta1,
+            generador=self._generador,
+            verificador=self._verificador,
+        )
         c1._marcados = self._marcados1.copy()
-        
-        c2 = Carton(self.palabra, self.max_num, self.tarjeta2)
+
+        c2 = Carton(
+            self.palabra,
+            self.max_num,
+            self.tarjeta2,
+            generador=self._generador,
+            verificador=self._verificador,
+        )
         c2._marcados = self._marcados2.copy()
-        
+
         bingo1, _ = self._verificador.tiene_bingo(c1, modo)
-        if bingo1: return True
+        if bingo1:
+            return True
         bingo2, _ = self._verificador.tiene_bingo(c2, modo)
         return bingo2
     

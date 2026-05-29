@@ -7,11 +7,8 @@ Razón para cambiar: Si cambia la secuencia de turnos, las condiciones de parada
 """
 
 from typing import Optional, Callable
-from bombo import Bombo
 from jugador import Jugador
-from gestor_jugaadores import GestorJugadores
-from validador_victoria import ValidadorVictoria
-from presentador_resultados import PresentadorResultados
+from interfaces import IBombo, IGestorJugadores, IValidadorVictoria, IPresentadorResultados
 
 
 # 🔹 Excepciones de dominio para tolerancia a fallos
@@ -36,10 +33,10 @@ class Juego:
 
     def __init__(
         self,
-        bombo: Bombo,
-        gestor: GestorJugadores,
-        validador: ValidadorVictoria,
-        presentador: PresentadorResultados
+        bombo: IBombo,
+        gestor: IGestorJugadores,
+        validador: IValidadorVictoria,
+        presentador: IPresentadorResultados
     ) -> None:
         self._bombo = bombo
         self._gestor = gestor

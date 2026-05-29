@@ -3,7 +3,7 @@ Módulo: carton.py
 Responsabilidad única: Representar el estado de un cartón de bingo y permitir marcar números.
 Razón para cambiar: Si cambia la estructura interna de almacenamiento o la lógica de marcado.
 """
-from interfaces import IMarcable, IVerificable, IImprimible, IMarcableVerificable
+from interfaces import IMarcableVerificable, IImprimible, IGeneradorCarton, IVerificadorBingo
 from typing import Optional
 from exceptions import NumeroInvalidoError
 from generador_carton import GeneradorCarton
@@ -27,24 +27,39 @@ class Carton(IMarcableVerificable, IImprimible):
     """
     
     
-    def __init__(self, palabra: str, max_num: int, tarjeta: Optional[list[list]] = None):
+    def __init__(
+        self,
+        palabra: str,
+        max_num: int,
+        tarjeta: Optional[list[list]] = None,
+        generador: Optional[IGeneradorCarton] = None,
+        verificador: Optional[IVerificadorBingo] = None,
+    ):
         """
-        Inicializa un cartón con una tarjeta existente o vacía.
-        
+        Inicializa un cartón con una tarjeta existente o generada por un generador inyectado.
+
         Args:
             palabra: Palabra de 5 letras para los encabezados.
             max_num: Número máximo del juego (50-90, múltiplo de 5).
-            tarjeta: Matriz 5x5 generada externamente. Si es None, crea una vacía.
+            tarjeta: Matriz 5x5 generada externamente.
+            generador: Generador inyectado que crea la tarjeta si no se proporciona una.
+            verificador: Verificador de bingo inyectado para validar el cartón.
         """
         self.palabra = palabra.upper()
         self.tam = len(self.palabra)  # Siempre 5
         self.max_num = max_num
         
-        # Recibe la tarjeta generada externamente (inyección de dependencia)
-        self.tarjeta = tarjeta if tarjeta is not None else self._generar_tarjeta()
+        # Inyección de dependencia para generación de tarjeta
+        self._generador = generador if generador is not None else GeneradorCarton(palabra, max_num)
+        self.tarjeta = tarjeta if tarjeta is not None else self._generador.generar()
 
         # Conjunto de posiciones marcadas: {(fila, col), ...}
         self._marcados: set[tuple[int, int]] = set()
+        if verificador is not None:
+            self._verificador = verificador
+        else:
+            from verificador_bingo import VerificadorBingo
+            self._verificador = VerificadorBingo()
         
         # Marcar automáticamente la casilla central si ya es "X"
         centro = self.tam // 2
@@ -119,16 +134,12 @@ class Carton(IMarcableVerificable, IImprimible):
         return [[0] * self.tam for _ in range(self.tam)]
 
     def _generar_tarjeta(self) -> list[list]:
-        """Genera una tarjeta aleatoria usando el generador de cartones."""
-        generador = GeneradorCarton(self.palabra, self.max_num)
-        return generador.generar()
+        """Genera una tarjeta aleatoria usando el generador inyectado."""
+        return self._generador.generar()
 
     def verificar_bingo(self, modo: str | None = None) -> bool:
         """Verifica si este cartón tiene bingo según el modo seleccionado."""
-        from verificador_bingo import VerificadorBingo
-
-        verificador = VerificadorBingo()
-        tiene_bingo, _ = verificador.tiene_bingo(self, modo)
+        tiene_bingo, _ = self._verificador.tiene_bingo(self, modo)
         return tiene_bingo
     
     # Métodos de presentación delegados a una clase externa (SRP)

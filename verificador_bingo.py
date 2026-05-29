@@ -6,7 +6,6 @@ Principio: SRP + OCP — Coordinación separada, patrones extensibles.
 """
 from interfaces import IVerificadorBingo, IGestorPatrones
 from typing import Optional
-from carton import Carton
 from verificador_patron import (
     VerificadorPatron,
     VerificadorFila, VerificadorColumna, VerificadorDiagonal,
