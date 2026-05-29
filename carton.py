@@ -20,6 +20,9 @@ class Carton:
     
     NO genera tarjetas, NO verifica patrones, NO imprime.
     """
+    # En carton.py (agregar este método):
+
+    
     
     def __init__(self, palabra: str, max_num: int, tarjeta: Optional[list[list]] = None):
         """
@@ -102,6 +105,11 @@ class Carton:
             set: Copia del conjunto de tuplas (fila, col) marcadas.
         """
         return self._marcados.copy()
+    
+    def _inicializar_con_estado(self, tarjeta: list[list], marcados: set[tuple[int,int]]) -> None:
+        """Inicializa el cartón con una tarjeta y estado de marcados existentes."""
+        self.tarjeta = tarjeta
+        self._marcados = marcados.copy()
     
     def _crear_matriz_vacia(self) -> list[list]:
         """Crea una matriz 5x5 inicial con ceros."""
