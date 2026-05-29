@@ -2,79 +2,89 @@
 
 ## Descripción
 
-Este proyecto implementa un sistema completo de Bingo utilizando Programación Orientada a Objetos en Python. A partir de un generador de cartones parametrizable, se construye una simulación completa que incluye jugadores, cartones, un bombo y la ejecución de la partida.
+Este proyecto implementa un juego de Bingo en Python con una arquitectura orientada a objetos y principios SOLID.
+El sistema permite configurar la partida con una palabra de 5 letras, un rango máximo de números, jugadores con cartones normales o dobles y ejecutar la partida desde la consola.
 
-El sistema permite:
-- Configurar la palabra del bingo (5 letras sin repetir)
-- Definir el rango máximo de números (entre 50 y 90, múltiplo de 5)
-- Simular una partida completa hasta que haya un ganador
+## Características
 
----
+- Juego de Bingo interactivo por consola
+- Cartón normal y cartón doble
+- Extracción aleatoria de números sin repetición
+- Validación de bingo por múltiples patrones
+- Inyección de dependencias y diseño basado en interfaces
+- Manejo de errores de dominio y presentación separada
 
-## Estructura del proyecto
+## Requisitos
 
-proyecto_bingo/
-│
-├── carton.py
-├── carton_doble.py
-├── jugador.py
-├── bombo.py
-├── juego.py
-├── main.py
-└── README.md
+- Python 3.11 o superior
 
+## Ejecución
 
----
-
-## Cómo ejecutar
-
-1. Asegúrate de tener Python 3.11 o superior
-2. Ejecuta el siguiente comando en la terminal:
+1. Abre la terminal en la carpeta del proyecto.
+2. Ejecuta:
 
 ```bash
 python main.py
 ```
 
-3. Sigue las instrucciones en consola 
+3. Sigue las instrucciones en pantalla para:
+- Ingresar la palabra del juego (5 letras, sin repetir)
+- Definir el número máximo (entre 50 y 90, múltiplo de 5)
+- Seleccionar el modo de verificación (filas, columnas, diagonal, etc.)
+- Registrar jugadores y elegir cartón normal o doble
+- Iniciar la partida
 
----
+## Estructura del proyecto
 
-## Diseño del sistema
+- `main.py`: punto de entrada, configuración del juego y menú interactivo.
+- `juego.py`: orquesta la partida, recorre turnos, extrae números y valida ganador.
+- `bombo.py`: gestiona el bombo de números aleatorios.
+- `carton.py`: representa un cartón de bingo y su estado de marcado.
+- `carton_doble.py`: extiende `Carton` para manejar dos grillas.
+- `jugador.py`: administra los cartones de un jugador y marca números.
+- `generador_carton.py`: genera tarjetas 5x5 válidas con casilla central libre.
+- `verificador_patron.py`: implementa verificadores de patrones de bingo.
+- `verificador_bingo.py`: coordina la verificación de bingo usando múltiples patrones.
+- `validador_victoria.py`: determina el ganador entre los jugadores.
+- `presentador_resultados.py`: muestra el progreso y resultado final en consola.
+- `gestor_jugaadores.py`: administra la colección de jugadores.
+- `interfaces.py`: define contratos e interfaces para el diseño del sistema.
+- `exceptions.py`: errores de dominio usados por el proyecto.
 
-El sistema está compuesto por las siguientes clases:
+## Diseño y principios aplicados
 
-- Carton: representa un cartón de bingo
-- CartonDoble: extiende Carton y contiene dos grillas
-- Jugador: gestiona cartones y verifica si ha ganado
-- Bombo: genera números aleatorios sin repetición
-- Juego: coordina toda la partida
+- SOLID:
+  - Single Responsibility Principle (SRP): cada módulo tiene una responsabilidad clara.
+  - Open/Closed Principle (OCP): los validadores y patrones pueden extenderse sin modificar código existente.
+  - Liskov Substitution Principle (LSP): `CartonDoble` extiende `Carton` y mantiene la misma interfaz pública.
+  - Interface Segregation Principle (ISP): se usan interfaces pequeñas como `IMarcable`, `IVerificable`, `IGeneradorCarton`, etc.
+  - Dependency Inversion Principle (DIP): el `Juego` depende de contratos (`IBombo`, `IGestorJugadores`, `IValidadorVictoria`, `IPresentadorResultados`) en vez de implementaciones concretas.
 
-## Justificación de relaciones
+- Arquitectura:
+  - `main.py` actúa como Composition Root, ensamblando componentes y decidiendo qué implementaciones usar.
+  - La presentación se separa de la lógica de negocio en `presentador_resultados.py`.
+  - La generación de cartones y la verificación de patrones están desacopladas.
 
-### 1. Carton → CartonDoble (Herencia)
+## Flujo de juego
 
-CartonDoble es un tipo de Carton, ya que comparte su comportamiento base pero lo extiende para manejar dos grillas. Se utiliza herencia para reutilizar código y especializar la lógica.
+1. `main.py` solicita configuración al usuario.
+2. Se crea un `Juego` con sus dependencias inyectadas.
+3. Se registran jugadores con `Carton` o `CartonDoble`.
+4. `Juego.jugar()` recorre turnos, extrae números del `Bombo` y marca en los cartones.
+5. Al final de cada turno, `ValidadorVictoria` verifica si algún jugador ganó.
+6. `PresentadorResultados` muestra el resultado final y el historial.
 
-### 2. Juego → Bombo (Composición)
+## Ejemplo de uso
 
-El bombo es parte fundamental del juego. Se crea junto con el juego y no tiene sentido sin él. Su ciclo de vida depende completamente del Juego.
-
-### 3. Jugador → Carton (Agregación)
-
-Los cartones existen independientemente de los jugadores. Un cartón puede ser creado antes, asignado o eliminado sin afectar su existencia. Por eso se modela como agregación.
-
-### 4. Juego → Jugador (Asociación)
-
-El juego no crea ni destruye jugadores, solo los registra. Los jugadores pueden existir fuera del juego, por lo que la relación es de asociación.
-
-## Características destacadas
-- Uso de herencia y polimorfismo
-- Implementación sin librerías externas
-- Uso de type hints
-- Código organizado por clases
-- Cumplimiento de convenciones PEP 8
+- Inicia el juego con `python main.py`
+- Ingresa la palabra `BINGO`
+- Ingresa el número máximo `75`
+- Selecciona modo `filas_columnas`
+- Agrega jugadores y elige cartones normales o dobles
+- Inicia la partida y observa cómo se extraen números y se anuncia el ganador
 
 ## Autores
+
 - Jose Angel Mejia Medina
 - Henrry Román Puerres Tipas
 

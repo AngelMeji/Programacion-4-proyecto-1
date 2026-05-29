@@ -5,7 +5,9 @@ Razón para cambiar: Si cambia la lógica de combinación/prioridad de patrones.
 Principio: SRP + OCP — Coordinación separada, patrones extensibles.
 """
 from interfaces import IVerificadorBingo, IGestorPatrones
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
+if TYPE_CHECKING:
+    from carton import Carton
 from verificador_patron import (
     VerificadorPatron,
     VerificadorFila, VerificadorColumna, VerificadorDiagonal,
