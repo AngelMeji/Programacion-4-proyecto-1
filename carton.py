@@ -3,13 +3,18 @@ Módulo: carton.py
 Responsabilidad única: Representar el estado de un cartón de bingo y permitir marcar números.
 Razón para cambiar: Si cambia la estructura interna de almacenamiento o la lógica de marcado.
 """
-
+from interfaces import IMarcable, IVerificable, IImprimible, IMarcableVerificable
 from typing import Optional
 from exceptions import NumeroInvalidoError
 from generador_carton import GeneradorCarton
 
 
-class Carton:
+class Carton(IMarcableVerificable, IImprimible):
+    """
+    Representa el estado de un cartón de bingo.
+    Implementa 3 interfaces segregadas para que cada cliente dependa solo de lo que necesita.
+    """
+    
     """
     Representa el estado de un cartón de bingo.
     
@@ -20,8 +25,6 @@ class Carton:
     
     NO genera tarjetas, NO verifica patrones, NO imprime.
     """
-    # En carton.py (agregar este método):
-
     
     
     def __init__(self, palabra: str, max_num: int, tarjeta: Optional[list[list]] = None):

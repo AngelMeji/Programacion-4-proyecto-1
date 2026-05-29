@@ -10,14 +10,15 @@ Responsabilidades:
 Relación:
 - Contiene cartones que pueden existir independientemente (agregación).
 """
+from interfaces import IMarcableVerificable
 
 class Jugador:
     def __init__(self, nombre: str):
         self.nombre = nombre
-        self.cartones: list = []
+        self.cartones: list[IMarcableVerificable] = []
         self.numeros_marcados = 0  # Contador de números marcados
 
-    def agregar_carton(self, carton) -> None:
+    def agregar_carton(self, carton: IMarcableVerificable) -> None:
         """Agrega un cartón al jugador."""
         self.cartones.append(carton)
 

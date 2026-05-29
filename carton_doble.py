@@ -23,6 +23,9 @@ class CartonDoble(Carton):
         super().__init__(palabra, max_num, t1)
         
         # 3. Configurar segunda tarjeta y estados independientes
+        # Guardar explícitamente la primera tarjeta para acceso directo
+        self.tarjeta1 = t1
+
         self.tarjeta2 = t2
         self._marcados1 = self._marcados.copy()  # Centro ya marcado por super()
         self._marcados2: set[tuple[int, int]] = {(2, 2)}

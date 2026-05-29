@@ -4,8 +4,9 @@ Razón para cambiar: Si cambia la regla de ganar (ej: cartón lleno, línea, pat
 """
 from typing import Optional
 from jugador import Jugador
+from interfaces import IValidadorVictoria
 
-class ValidadorVictoria:
+class ValidadorVictoria(IValidadorVictoria):
     """Validador configurable de victoria.
 
     Se puede inicializar con un `modo` para validar solo ciertos patrones

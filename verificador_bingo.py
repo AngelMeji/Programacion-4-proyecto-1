@@ -4,7 +4,7 @@ Responsabilidad única: Coordinar múltiples verificadores de patrones.
 Razón para cambiar: Si cambia la lógica de combinación/prioridad de patrones.
 Principio: SRP + OCP — Coordinación separada, patrones extensibles.
 """
-
+from interfaces import IVerificadorBingo, IGestorPatrones
 from typing import Optional
 from carton import Carton
 from verificador_patron import (
@@ -15,7 +15,7 @@ from verificador_patron import (
 )
 
 
-class VerificadorBingo:
+class VerificadorBingo(IVerificadorBingo, IGestorPatrones):
     """
     Coordina la verificación de múltiples patrones de victoria.
     
