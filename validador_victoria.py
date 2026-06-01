@@ -1,7 +1,4 @@
-"""
-Responsabilidad única: Determinar si un jugador cumple la condición de victoria.
-Razón para cambiar: Si cambia la regla de ganar (ej: cartón lleno, línea, patrón especial).
-"""
+"""Validador de victoria basado en los cartones de cada jugador."""
 from typing import Optional
 from jugador import Jugador
 from interfaces import IValidadorVictoria

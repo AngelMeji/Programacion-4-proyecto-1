@@ -4,8 +4,11 @@ Responsabilidad única: Coordinar múltiples verificadores de patrones.
 Razón para cambiar: Si cambia la lógica de combinación/prioridad de patrones.
 Principio: SRP + OCP — Coordinación separada, patrones extensibles.
 """
-from interfaces import IVerificadorBingo, IGestorPatrones
+from interfaces import IGestorPatrones, IVerificadorBingo
 from typing import Optional, TYPE_CHECKING
+
+from exceptions import PatronNoRegistradoError
+
 if TYPE_CHECKING:
     from carton import Carton
 from verificador_patron import (
@@ -69,10 +72,8 @@ class VerificadorBingo(IVerificadorBingo, IGestorPatrones):
         marcados = carton.obtener_marcados()
         centro = len(tarjeta) // 2
         
-        # Filtrar patrones según el modo solicitado
         patrones_a_verificar = self._filtrar_por_modo(modo)
-        
-        # Verificar cada patrón en orden
+
         for patron in patrones_a_verificar:
             if patron.cumple(tarjeta, marcados, centro):
                 return True, patron.nombre
@@ -83,14 +84,15 @@ class VerificadorBingo(IVerificadorBingo, IGestorPatrones):
         """Filtra la lista de patrones según el modo solicitado."""
         if not modo or modo.lower() in ("todos", ""):
             return self._patrones
-        
-        modo_key = modo.lower()
-        claves_permitidas = self.MODO_A_CLAVES.get(modo_key)
-        
+
+        modo_key = modo.lower().strip()
+        if modo_key not in self.MODO_A_CLAVES:
+            raise PatronNoRegistradoError(f"Modo de verificacion no registrado: {modo}")
+
+        claves_permitidas = self.MODO_A_CLAVES[modo_key]
         if claves_permitidas is None:
-            # Modo no reconocido: no verificar nada por seguridad
-            return []
-        
+            return self._patrones
+
         return [p for p in self._patrones if p.modo_clave in claves_permitidas]
     
     def agregar_patron(self, patron: VerificadorPatron) -> None:

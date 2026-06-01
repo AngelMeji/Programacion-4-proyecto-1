@@ -68,6 +68,10 @@ class IBombo(ABC):
     def hay_numeros(self) -> bool:
         pass
 
+    @abstractmethod
+    def formatear_numero(self, numero: int) -> str:
+        pass
+
 class IGestorJugadores(ABC):
     """Contrato para gestión de jugadores en el juego."""
 
@@ -99,7 +103,7 @@ class IPresentadorResultados(ABC):
         pass
 
     @abstractmethod
-    def mostrar_turno(self, numero: int, turno: int) -> None:
+    def mostrar_turno(self, numero: str, turno: int) -> None:
         pass
 
     @abstractmethod
@@ -111,10 +115,14 @@ class IPresentadorResultados(ABC):
         pass
 
     @abstractmethod
+    def mostrar_error(self, mensaje: str) -> None:
+        pass
+
+    @abstractmethod
     def mostrar_resultado_final(
         self,
         ganador,
-        historial: str,
+        historial: list[str],
         resumen_jugadores: list[tuple[str, int]]
     ) -> None:
         pass

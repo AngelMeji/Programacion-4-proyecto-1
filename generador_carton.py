@@ -32,31 +32,30 @@ class GeneradorCarton(IGeneradorCarton):
         try:
             tarjeta = [[0] * self.tam for _ in range(self.tam)]
             usados = set()
-            
+
             for col in range(self.tam):
                 minimo, maximo = self._rango_columna(col)
                 disponibles = [n for n in range(minimo, maximo + 1) if n not in usados]
-                
+
                 if len(disponibles) < self.tam:
                     raise GeneracionCartonError(
                         f"No hay suficientes números en columna {col} [{minimo}-{maximo}]"
                     )
-                
+
                 seleccionados = random.sample(disponibles, self.tam)
                 for fila, valor in enumerate(seleccionados):
                     tarjeta[fila][col] = valor
                     usados.add(valor)
-            
-            # Casilla central libre
+
             centro = self.tam // 2
             tarjeta[centro][centro] = "X"
-            
+
             return tarjeta
-            
-        except Exception as e:
-            if isinstance(e, GeneracionCartonError):
-                raise
-            raise GeneracionCartonError(f"Error generando tarjeta: {e}") from e
+
+        except GeneracionCartonError:
+            raise
+        except ValueError as error:
+            raise GeneracionCartonError(f"Error generando tarjeta: {error}") from error
     
     def generar_varias(self, cantidad: int) -> list[list[list]]:
         """Genera múltiples tarjetas independientes."""
