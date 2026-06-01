@@ -1,108 +1,72 @@
-# carton_doble.py - Refactorizado para LSP
-from typing import Optional
+"""Cartón doble construido por composición de dos cartones simples."""
+
+from interfaces import IGeneradorCarton, IImprimible, IMarcableVerificable, IVerificadorBingo
 from carton import Carton
-from generador_carton import GeneradorCarton
-from verificador_bingo import VerificadorBingo
-from interfaces import IGeneradorCarton, IVerificadorBingo
 
 
-class CartonDoble(Carton):
-    """
-    Cartón con dos tarjetas independientes. Gana si cualquiera completa un patrón.
-    
-    Cumple LSP: Mantiene la misma interfaz pública que Carton.
-    Cualquier función que espere un Carton puede recibir un CartonDoble sin modificaciones.
-    """
-    
+class CartonDoble(IMarcableVerificable, IImprimible):
+    """Agrupa dos cartones independientes y gana si cualquiera completa un patrón."""
+
     def __init__(
         self,
         palabra: str,
         max_num: int,
-        generador: Optional[IGeneradorCarton] = None,
-        verificador: Optional[IVerificadorBingo] = None,
+        generador: IGeneradorCarton,
+        verificador: IVerificadorBingo,
     ):
-        # 1. Generar ambas tarjetas mediante inyección de dependencia
-        self._generador = generador if generador is not None else GeneradorCarton(palabra, max_num)
-        t1 = self._generador.generar()
-        t2 = self._generador.generar()
+        self.palabra = palabra.strip().upper()
+        self.max_num = max_num
+        self._generador = generador
+        self._verificador = verificador
 
-        # 2. Inicializar como Carton normal (hereda validación y atributos base)
-        super().__init__(palabra, max_num, t1, generador=self._generador, verificador=verificador)
+        self.carton1 = Carton(self.palabra, self.max_num, self._generador, self._verificador)
+        self.carton2 = Carton(self.palabra, self.max_num, self._generador, self._verificador)
+        self.tarjeta = self.carton1.tarjeta
 
-        # 3. Configurar segunda tarjeta y estados independientes
-        self.tarjeta1 = t1
-        self.tarjeta2 = t2
-        self._marcados1 = self._marcados.copy()  # Centro ya marcado por super()
-        self._marcados2: set[tuple[int, int]] = {(2, 2)}
-        self._verificador = verificador if verificador is not None else self._verificador
-
-        # Compatibilidad LSP: por defecto apunta a la primera tarjeta
-        self.tarjeta = self.tarjeta1
-    
     def marcar_numero(self, numero: int) -> bool:
-        """Marca en ambas tarjetas. Retorna True si se marcó en al menos una."""
-        m1 = self._marcar_en_tarjeta(numero, self.tarjeta1, self._marcados1)
-        m2 = self._marcar_en_tarjeta(numero, self.tarjeta2, self._marcados2)
-        return m1 or m2
-    
-    def _marcar_en_tarjeta(self, numero: int, tarjeta: list[list], 
-                          marcados: set[tuple[int, int]]) -> bool:
-        for i in range(5):
-            for j in range(5):
-                if tarjeta[i][j] == numero and (i, j) not in marcados:
-                    marcados.add((i, j))
-                    return True
-        return False
-    
+        """Marca el número en ambos cartones y retorna si al menos uno cambió."""
+        marcado_1 = self.carton1.marcar_numero(numero)
+        marcado_2 = self.carton2.marcar_numero(numero)
+        return marcado_1 or marcado_2
+
     def esta_marcado(self, fila: int, col: int) -> bool:
-        return ((fila, col) in self._marcados1 or self.tarjeta1[fila][col] == "X" or
-                (fila, col) in self._marcados2 or self.tarjeta2[fila][col] == "X")
-    
-    def verificar_bingo(self, modo: str = None) -> bool:
-        c1 = Carton(
-            self.palabra,
-            self.max_num,
-            self.tarjeta1,
-            generador=self._generador,
-            verificador=self._verificador,
-        )
-        c1._marcados = self._marcados1.copy()
+        """Indica si la posición está marcada en alguna de las dos grillas."""
+        return self.carton1.esta_marcado(fila, col) or self.carton2.esta_marcado(fila, col)
 
-        c2 = Carton(
-            self.palabra,
-            self.max_num,
-            self.tarjeta2,
-            generador=self._generador,
-            verificador=self._verificador,
-        )
-        c2._marcados = self._marcados2.copy()
+    def verificar_bingo(self, modo: str | None = None) -> bool:
+        """Verifica bingo en cualquiera de las dos grillas."""
+        return self.carton1.verificar_bingo(modo) or self.carton2.verificar_bingo(modo)
 
-        bingo1, _ = self._verificador.tiene_bingo(c1, modo)
-        if bingo1:
-            return True
-        bingo2, _ = self._verificador.tiene_bingo(c2, modo)
-        return bingo2
-    
     def grilla_mas_cerca(self) -> str:
-        total1 = len(self._marcados1)
-        total2 = len(self._marcados2)
-        if total1 > total2: return "Cartón 1"
-        if total2 > total1: return "Cartón 2"
-        return "Ambos están igual de cerca"
-    
+        """Indica cuál grilla tiene más posiciones marcadas."""
+        total_1 = len(self.carton1.obtener_marcados())
+        total_2 = len(self.carton2.obtener_marcados())
+        if total_1 > total_2:
+            return "Carton 1"
+        if total_2 > total_1:
+            return "Carton 2"
+        return "Ambos estan igual de cerca"
+
     def imprimir(self, presentador=None) -> None:
-        if presentador and hasattr(presentador, 'imprimir_carton_doble'):
+        """Imprime ambas grillas usando un presentador o un formato básico."""
+        if presentador and hasattr(presentador, "imprimir_carton_doble"):
             presentador.imprimir_carton_doble(self)
-        else:
-            print("=== Cartón 1 ===")
-            self._imprimir_basico(self.tarjeta1, self._marcados1)
-            print("\n=== Cartón 2 ===")
-            self._imprimir_basico(self.tarjeta2, self._marcados2)
-    
-    def _imprimir_basico(self, tarjeta: list[list], marcados: set) -> None:
-        print("   ".join(self.palabra))
+            return
+
+        print("=== Carton 1 ===")
+        self._imprimir_basico(self.carton1.palabra, self.carton1.obtener_tarjeta(), self.carton1.obtener_marcados())
+        print("\n=== Carton 2 ===")
+        self._imprimir_basico(self.carton2.palabra, self.carton2.obtener_tarjeta(), self.carton2.obtener_marcados())
+
+    def _imprimir_basico(self, palabra: str, tarjeta: list[list], marcados: set[tuple[int, int]]) -> None:
+        """Dibuja una grilla del cartón doble en consola."""
+        print("   ".join(palabra))
         print("-" * 15)
-        for i, fila in enumerate(tarjeta):
-            linea = [" X" if (i, j) in marcados or valor == "X" else f"{valor:2}" 
-                     for j, valor in enumerate(fila)]
+        for fila, valores in enumerate(tarjeta):
+            linea = []
+            for columna, valor in enumerate(valores):
+                if (fila, columna) in marcados or valor == "X":
+                    linea.append(" X")
+                else:
+                    linea.append(f"{valor:2}")
             print("  ".join(linea))
