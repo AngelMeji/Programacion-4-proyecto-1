@@ -1,29 +1,26 @@
-"""
-Representa un jugador del juego de bingo.
+"""Modelo de un jugador del juego de Bingo."""
 
-Responsabilidades:
-- Gestionar uno o más cartones.
-- Marcar números en sus cartones.
-- Verificar si ha ganado.
-- Llevar conteo de números marcados.
-
-Relación:
-- Contiene cartones que pueden existir independientemente (agregación).
-"""
 from interfaces import IMarcableVerificable
 
+
 class Jugador:
+    """Agrupa los cartones y el estado de marcado de un jugador."""
+
     def __init__(self, nombre: str):
-        self.nombre = nombre
+        nombre_limpio = nombre.strip()
+        if not nombre_limpio:
+            raise ValueError("El nombre del jugador no puede estar vacío.")
+
+        self.nombre = nombre_limpio
         self.cartones: list[IMarcableVerificable] = []
-        self.numeros_marcados = 0  # Contador de números marcados
+        self.numeros_marcados = 0
 
     def agregar_carton(self, carton: IMarcableVerificable) -> None:
         """Agrega un cartón al jugador."""
         self.cartones.append(carton)
 
-    def eliminar_carton(self, carton) -> None:
-        """Elimina un cartón del jugador."""
+    def eliminar_carton(self, carton: IMarcableVerificable) -> None:
+        """Elimina un cartón del jugador si existe."""
         if carton in self.cartones:
             self.cartones.remove(carton)
 
@@ -36,9 +33,5 @@ class Jugador:
         self.numeros_marcados += marcados
 
     def verificar_bingo(self, modo: str | None = None) -> bool:
-        """Verifica si alguno de sus cartones tiene bingo.
-
-        Args:
-            modo: Opcional, se pasa al cartón para validar solo ese patrón.
-        """
+        """Verifica si alguno de sus cartones completo un patrón ganador."""
         return any(carton.verificar_bingo(modo) for carton in self.cartones)
